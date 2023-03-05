@@ -1,0 +1,108 @@
+(* C++ keywords *)
+
+module Keywords = Set.Make (String)
+
+let kwd = Keywords.of_list [
+  "alignas"; "alignof"; "asm"; "auto"; "bool"; "break"; "case"; "catch";
+  "char"; "char16_t"; "char32_t"; "class"; "const"; "constexpr"; "const_cast";
+  "continue"; "decltype"; "default"; "delete"; "do"; "double"; "dynamic_cast";
+  "else"; "enum"; "explicit"; "export"; "extern"; "false"; "float"; "for";
+  "friend"; "goto"; "if"; "inline"; "int"; "long"; "mutable"; "namespace";
+  "new"; "noexcept"; "nullptr"; "operator"; "private"; "protected"; "public";
+  "register"; "reinterpret_cast"; "return"; "short"; "signed"; "sizeof";
+  "static"; "static_assert"; "static_cast"; "struct"; "switch"; "template";
+  "this"; "thread_local"; "throw"; "true"; "try"; "typedef"; "typeid";
+  "typename"; "union"; "unsigned"; "using"; "virtual"; "void"; "volatile";
+  "wchar_t"; "while"]
+
+
+(*
+| ident                   { let id = Lexing.lexeme lexbuf
+                            in if not (Keywords.mem id kwd) then log reg
+                          }
+*)
+
+(* Integer *)
+
+let int_suf = 'U' | 'u' | 'L' | 'l' | "UL" | "Ul" | "uL"
+            | "ul" | "LU" | "Lu" | "lU" | "lu"
+let dec = digit+ int_suf?
+let hexdigit = digit | ['A'-'F' 'a'-'f']
+let hex_pre = "0x" | "0X"
+let hexa = hex_pre hexdigit+ int_suf?
+let integer = dec | hexa
+
+(* Float *)
+
+let exponent = (['e' 'E'] ['+' '-']? decimal)?
+let float_suf = ['F' 'f' 'D' 'd' 'M' 'm']
+let float = (decimal? '.')? decimal exponent? float_suf?
+
+
+(* Positions *)
+
+let dummy = Lexing.(dummy_pos, dummy_pos)
+let is_dummy s = (s = dummy)
+
+
+
+
+
+(*            match cand with
+              [] -> scan [] stack (col+1) lexbuf
+            | (_,(stop_line,_))::_ ->
+                (if stop_line = !virt_lnum
+                 then find_col else scan) cand stack (col+1) lexbuf } 
+
+and find_col cand stack c = parse
+  newline { copy lexbuf;
+            handle_nl lexbuf;
+            find_col cand stack 0 lexbuf }
+| eof     { assert false }
+| _       { copy lexbuf;
+            match cand with
+              [] -> scan [] stack (c+1) lexbuf
+            | (_,(stop_line,stop_col)) :: cand' ->
+                (if stop_col = c
+                 then (output_string !out_chan 
+                                     (" (pos(" ^ string_of_int stop_line ^ ","
+                                      ^ string_of_int c ^ "),");
+                       scan cand' (Virt::stack))
+                 else find_col cand stack) (c+1) lexbuf }
+*)
+(*
+and end_exp c cand = parse
+  newline { copy lexbuf; handle_nl lexbuf; end_exp 0 cand lexbuf }
+| eof     {}
+| '"'     { copy lexbuf; ignore(in_string 0 [] lexbuf); end_exp cand lexbuf }
+| "//"    { copy lexbuf; in_line_com lexbuf; end_exp cand lexbuf }
+| "/*"    { copy lexbuf; in_block_com lexbuf; end_exp cand lexbuf }
+| '('     { copy lexbuf; after_lpar cand 1 lexbuf }
+| '{'     { copy lexbuf; prerr_endline "In!"; after_lbra cand 1 lexbuf }
+(* | '['     { copy lexbuf; after_lsq cand 1 lexbuf } *)
+| [')' '}' ']' ',' ';'] as l
+          { prerr_endline (String.make 1 l); output_string !out_chan ")"; copy lexbuf; scan cand lexbuf }
+| _       { copy lexbuf; end_exp cand lexbuf }
+
+and after_lpar cand n = parse
+  newline                 { copy lexbuf; handle_nl lexbuf;
+                            after_lpar cand n lexbuf }
+| blank | ['\011'-'\013'] { copy lexbuf; after_lpar cand n lexbuf }
+| '('                     { copy lexbuf; after_lpar cand (n+1) lexbuf }
+| ')'                     { copy lexbuf; if n=1 then end_exp cand lexbuf
+                                         else after_lpar cand (n-1) lexbuf }
+| eof                     { assert false }
+| _                       { copy lexbuf; after_lpar cand n lexbuf }
+
+and after_lbra cand n = parse
+  newline                 { copy lexbuf; handle_nl lexbuf;
+                            after_lbra cand n lexbuf }
+| blank | ['\011'-'\013'] { copy lexbuf; after_lbra cand n lexbuf }
+| '{'                     { copy lexbuf; after_lbra cand (n+1) lexbuf }
+| '}'                     { copy lexbuf; 
+                            if n=1 then (prerr_endline "HHH";
+                                         end_exp cand lexbuf)
+                            else after_lbra cand (n-1) lexbuf }
+| eof                     { assert false }
+| _                       { copy lexbuf; after_lbra cand n lexbuf }
+*)
